@@ -35,10 +35,28 @@ jobs:
         working-directory: epg-grabber
         run: npm run grab -- --sites=airtelxstream.in --output=../guide-airtel.xml --days=2
 
+      - name: Grab beIN Sports guide
+        working-directory: epg-grabber
+        run: npm run grab -- --sites=bein.com --output=../guide-bein.xml --days=2
+
+      - name: Grab DAZN guide
+        working-directory: epg-grabber
+        run: npm run grab -- --sites=dazn.com --output=../guide-dazn.xml --days=2
+
+      - name: Grab Sport TV (Portugal) guide
+        working-directory: epg-grabber
+        run: npm run grab -- --sites=sporttv.pt --output=../guide-sporttv.xml --days=2
+
+      - name: Download EPGShare01 beIN guide
+        run: curl -sL "https://epgshare01.online/epgshare01/epg_ripper_BEIN1.xml.gz" | gunzip > guide-epgshare-bein.xml
+
+      - name: Download EPGShare01 FanDuel guide
+        run: curl -sL "https://epgshare01.online/epgshare01/epg_ripper_FANDUEL1.xml.gz" | gunzip > guide-epgshare-fanduel.xml
+
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add guide-dishtv.xml guide-airtel.xml
+          git add guide-dishtv.xml guide-airtel.xml guide-bein.xml guide-dazn.xml guide-sporttv.xml guide-epgshare-bein.xml guide-epgshare-fanduel.xml
           git diff --staged --quiet || git commit -m "Auto-update EPG guides $(date -u +%Y-%m-%d)"
           git push
