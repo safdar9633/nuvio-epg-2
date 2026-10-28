@@ -1,0 +1,44 @@
+name: Update EPG Guides
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Clone iptv-org/epg grabber
+        run: git clone --depth 1 https://github.com/iptv-org/epg.git epg-grabber
+
+      - name: Install dependencies
+        working-directory: epg-grabber
+        run: npm install
+
+      - name: Grab DishTV guide
+        working-directory: epg-grabber
+        run: npm run grab -- --sites=dishtv.in --output=../guide-dishtv.xml --days=2
+
+      - name: Grab Airtel Xstream guide
+        working-directory: epg-grabber
+        run: npm run grab -- --sites=airtelxstream.in --output=../guide-airtel.xml --days=2
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add guide-dishtv.xml guide-airtel.xml
+          git diff --staged --quiet || git commit -m "Auto-update EPG guides $(date -u +%Y-%m-%d)"
+          git push
